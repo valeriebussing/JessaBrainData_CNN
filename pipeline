@@ -1,0 +1,104 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+import pandas as pd
+import numpy as np
+import scanpy as sc
+from sklearn.model_selection import train_test_split
+
+class JessaBrain_dataset(Dataset):
+    def __init__(self, data, labels):
+        self.data = torch.tensor(data, dtype=torch.float32)
+        self.labels = torch.tensor(labels, dtype=torch.long)
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        return self.data[idx], self.labels[idx]
+
+# Define CNN Model
+class JessaBrain_CNN(nn.Module):
+    def __init__(self, input_dim, num_classes):
+        super(JessaBrain_CNN, self).__init__()
+        self.conv1 = nn.Conv1d(in_channels=1, out_channels=16, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv1d(in_channels=16, out_channels=32, kernel_size=3, padding=1)
+        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
+        self.fc1 = nn.Linear(32 * (input_dim // 2), 128)
+        self.fc2 = nn.Linear(128, num_classes)
+
+    def forward(self, x):
+        x = x.unsqueeze(1)  # Add channel dimension
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(x.size(0), -1)  # Flatten
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+# Load and Preprocess JessaBrainData
+def load_data(filepath, target_col):
+    adata = sc.read_h5ad(filepath)  # Or use .csv/.tsv with `pd.read_csv()`
+    sc.pp.filter_genes(adata, min_cells=3)  # Filter low-expression genes
+    sc.pp.normalize_total(adata, target_sum=1e4)
+    sc.pp.log1p(adata)
+    sc.pp.highly_variable_genes(adata, n_top_genes=2000)
+    adata = adata[:, adata.var['highly_variable']]
+
+    data = adata.X.toarray() if hasattr(adata.X, "toarray") else adata.X
+    labels = adata.obs[target_col].astype('category').cat.codes
+
+    return data, labels
+
+def main():
+    # Load dataset
+    filepath = 'JessaBrainData.h5ad'  
+    target_col = 'cell_type'  
+    data, labels = load_data(filepath, target_col)
+
+    # Split data
+    X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
+
+    # Create DataLoaders
+    train_dataset = JessaBrain_dataset(X_train, y_train)
+    test_dataset = JessaBrain_dataset(X_test, y_test)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+
+    # Define model, loss, and optimizer
+    input_dim = X_train.shape[1]
+    num_classes = len(np.unique(labels))
+    model = JessaBrain_CNN(input_dim, num_classes)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+    # Training loop
+    num_epochs = 10
+    for epoch in range(num_epochs):
+        model.train()
+        running_loss = 0.0
+        for inputs, targets in train_loader:
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, targets)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+        print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {running_loss / len(train_loader)}")
+
+    # Evaluation
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for inputs, targets in test_loader:
+            outputs = model(inputs)
+            _, predicted = torch.max(outputs, 1)
+            total += targets.size(0)
+            correct += (predicted == targets).sum().item()
+    print(f"Test Accuracy: {100 * correct / total:.2f}%")
+
+if __name__ == "__main__":
+    main()
