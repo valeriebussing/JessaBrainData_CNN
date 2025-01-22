@@ -10,6 +10,7 @@ Link to full text pdf: https://pmc.ncbi.nlm.nih.gov/articles/PMC6885128/
 
 ### Run script
 In order to run this script, make sure you have PyTorch installed, as well as some other essential libraries:
+
 `
 pip install torch scprep scanpy scipy pandas
 `
