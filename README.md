@@ -26,6 +26,10 @@ You need to install several R packages to download JessaBrainData from the Bioco
 In R, run:
 
 `
+pip install torch anndata
+`
+
+`
 install.packages("BiocManager")
 
 BiocManager::install()
