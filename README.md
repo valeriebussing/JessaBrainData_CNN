@@ -18,7 +18,9 @@ pip install torch anndata
 You need to install several R packages to download JessaBrainData from the Bioconductor software:
 
 `Bioconductor`: For accessing the dataset
+
 `SingleCellExperiment`: To handle single-cell data
+
 `reticulate`: for Python-R interface
 
 In R, run:
