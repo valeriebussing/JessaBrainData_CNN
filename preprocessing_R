@@ -1,0 +1,27 @@
+install.packages("BiocManager")
+BiocManager::install()
+BiocManager::install("SingleCellExperiment")
+install.packages("reticulate")
+library(SingleCellExperiment)
+library(reticulate)
+
+JBD_sce <- scRNAseqData::JessaBrainData() 
+summary(JBD_sce)
+
+# Import necessary Python libraries
+anndata <- import("anndata")
+np <- import("numpy")
+
+expression_matrix <- as.matrix(JBD_sce@assays$counts)
+cell_names <- colnames(JBD_sce)
+gene_names <- rownames(JBD_sce)
+
+# Create AnnData object
+adata_JBD_sce <- anndata$AnnData(X=np$array(expression_matrix), obs=as.data.frame(cell_names), var=as.data.frame(gene_names))
+
+# Add metadata to 'obs' and 'var' 
+adata_JBD_sce$obs$cell_type <- JBD_sce$cell_type_info
+
+# Save to .h5ad format
+adata$write("JBD_sce.h5ad")
+
