@@ -25,11 +25,15 @@ You need to install several R packages to download JessaBrainData from the Bioco
 
 In R, run:
 
-`install.packages("BiocManager")
+`
+
+install.packages("BiocManager")
 
 BiocManager::install()
 
 BiocManager::install("SingleCellExperiment")
 
-install.packages("reticulate")`
+install.packages("reticulate")
+
+`
 
