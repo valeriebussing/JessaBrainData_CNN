@@ -27,8 +27,11 @@ In R, run:
 
 `
 install.packages("BiocManager")
+
 BiocManager::install()
+
 BiocManager::install("SingleCellExperiment")
+
 install.packages("reticulate")
 `
 
