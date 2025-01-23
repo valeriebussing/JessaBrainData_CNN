@@ -9,8 +9,24 @@ The dataset contains >65.000 cells (61.595 mouse, 3.945 cryopreserved human cell
 Link to full text pdf: https://pmc.ncbi.nlm.nih.gov/articles/PMC6885128/
 
 ### Run script
-In order to run this script, make sure you have PyTorch installed, as well as some other essential libraries:
+In order to run this script, make sure you have PyTorch installed. You also need `anndata` to convert the dataset to AnnData format (`.h5ad`)
 
 `
-pip install torch scprep scanpy scipy pandas
+pip install torch anndata
 `
+
+You need to install several R packages to download JessaBrainData from the Bioconductor software:
+
+`Bioconductor`: For accessing the dataset
+`SingleCellExperiment`: To handle single-cell data
+`reticulate`: for Python-R interface
+
+In R, run:
+
+`
+install.packages("BiocManager")
+BiocManager::install()
+BiocManager::install("SingleCellExperiment")
+install.packages("reticulate")
+`
+
