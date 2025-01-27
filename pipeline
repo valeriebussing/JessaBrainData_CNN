@@ -102,3 +102,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+    # Training loop
+    num_epochs = 10
+    for epoch in range(num_epochs):
+        model.train()
+        running_loss = 0.0
+        for inputs, targets in train_loader:
