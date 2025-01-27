@@ -1,7 +1,7 @@
 # JessaBrainData_CNN
 
 This repository uses single-cell RNA sequencing data from pediatric brain tumor samples to classify cancer subtypes based on gene expression profiles of individual cells.
-This script trains a convolutional neural netword to predict which cells are likely to exhibit resistance to chemotherapy based on their expression patterns.
+This script trains a convolutional neural netword to predict which cells are likely to exhibit resistance to chemotherapy based on their expression patterns. 
 
 ### Data
 This script uses the mouse brain single-cell RNA-seq dataset from Jessa et al. (2019)
